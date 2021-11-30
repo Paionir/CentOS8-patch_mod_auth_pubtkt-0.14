@@ -1,0 +1,82 @@
+--- mod_auth_pubtkt.c	2020-12-17 16:42:19.000000000 +0100
++++ mod_auth_pubtkt_new.c	2021-11-30 14:02:45.876768897 +0100
+@@ -672,7 +672,7 @@
+ 	}
+ 	
+ 	ERR_clear_error();
+-
++/*
+ #ifdef HAVE_EVP_MD_CTX_NEW
+ 	ctx = EVP_MD_CTX_new();
+ #elif HAVE_EVP_MD_CTX_CREATE
+@@ -681,10 +681,13 @@
+     ctx = malloc(sizeof(*ctx));
+     EVP_MD_CTX_init(ctx);
+ #endif
++*/
++	ctx = EVP_MD_CTX_new();
+ 
+ 	if (!EVP_VerifyInit(ctx, conf->digest)) {
+ 		ap_log_rerror(APLOG_MARK, APLOG_WARNING, APR_SUCCESS, r, 
+ 			"TKT validate_parse_ticket: EVP_VerifyInit failed");
++/*
+ #ifdef HAVE_EVP_MD_CTX_FREE
+ 		EVP_MD_CTX_free(ctx);
+ #elif HAVE_EVP_MD_CTX_DESTROY
+@@ -693,12 +696,15 @@
+         EVP_MD_CTX_cleanup(ctx);
+         free(ctx);
+ #endif
++*/
++		EVP_MD_CTX_free(ctx);
+ 		return NULL;
+ 	}
+ 	
+ 	if (!EVP_VerifyUpdate(ctx, tktval_buf, strlen(tktval_buf))) {
+ 		ap_log_rerror(APLOG_MARK, APLOG_WARNING, APR_SUCCESS, r, 
+ 			"TKT validate_parse_ticket: EVP_VerifyUpdate failed");
++/*
+ #ifdef HAVE_EVP_MD_CTX_FREE
+ 		EVP_MD_CTX_free(ctx);
+ #elif HAVE_EVP_MD_CTX_DESTROY
+@@ -707,6 +713,8 @@
+         EVP_MD_CTX_cleanup(ctx);
+         free(ctx);
+ #endif
++*/
++		EVP_MD_CTX_free(ctx);
+ 		return NULL;
+ 	}
+ 	
+@@ -723,6 +731,7 @@
+ 				"TKT validate_parse_ticket: OpenSSL error: %s", errbuf);
+ 		}
+ 		
++/*
+ #ifdef HAVE_EVP_MD_CTX_FREE
+ 		EVP_MD_CTX_free(ctx);
+ #elif HAVE_EVP_MD_CTX_DESTROY
+@@ -731,9 +740,12 @@
+         EVP_MD_CTX_cleanup(ctx);
+         free(ctx);
+ #endif
++*/
++		EVP_MD_CTX_free(ctx);
+ 		return NULL;
+ 	}
+ 
++/*
+ #ifdef HAVE_EVP_MD_CTX_FREE
+ 	EVP_MD_CTX_free(ctx);
+ #elif HAVE_EVP_MD_CTX_DESTROY
+@@ -742,7 +754,9 @@
+     EVP_MD_CTX_cleanup(ctx);
+     free(ctx);
+ #endif
+-	
++*/
++	EVP_MD_CTX_free(ctx);
++
+ 	/* good signature - parse ticket */
+ 	if (!parse_ticket(r, tktval_buf, tkt))
+ 		return NULL;
